@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="The Real Movers: which countries actually shifted to renewable energy between 2014 and 2024, and which already had it. A data case study by Alex Corvin.">
+<style>:root{color-scheme:light} body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
+<title>Renewable Energy Shift, 2014–2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@300..500&display=swap">
+<style>
+/* Corv Studio brand shell: Geist type, #121212 ink, white ground, square edges. Data colours stay separate. */
+/* Layout: one reading column of figures, each with a claim headline above the chart and a source line below — a research brief, not a tile dashboard. */
+:root{
+  --bg:#ffffff; --panel:#ffffff; --ink:#121212; --ink-2:#6b6b6b; --ink-3:#999999; --rule:#e3e3e3; --grid:#eeeeee;
+  --accent:#121212; --accent-soft:#121212;
+  --hydro:#5b9ddf; --wind:#5acaaf; --solar:#eba051; --other:#d073b3; --flat:#b8b8b8;
+  --f-display:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-data:"Geist Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121212; --panel:#171717; --ink:#ffffff; --ink-2:#aaaaaa; --ink-3:#808080; --rule:#2a2a2a; --grid:#222222;
+  --accent:#ffffff; --accent-soft:#ffffff;
+  --hydro:#4c88d3; --wind:#3da989; --solar:#cb8230; --other:#bc61a0; --flat:#5a5a5a; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#121212; --panel:#171717; --ink:#ffffff; --ink-2:#aaaaaa; --ink-3:#808080; --rule:#2a2a2a; --grid:#222222;
+  --accent:#ffffff; --accent-soft:#ffffff;
+  --hydro:#4c88d3; --wind:#3da989; --solar:#cb8230; --other:#bc61a0; --flat:#5a5a5a; color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:40px 64px}
+.eyebrow{font-family:var(--f-data);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--f-display);font-stretch:112%;font-weight:800;font-size:clamp(40px,7vw,76px);line-height:.98;letter-spacing:-.01em;margin:10px 0 10px;text-wrap:balance}
+.subtitle{font-family:var(--f-display);font-stretch:100%;font-weight:500;font-size:clamp(20px,2.8vw,30px);line-height:1.2;color:var(--ink-2);margin:0 0 22px;max-width:40ch;text-wrap:balance}
+h2{font-family:var(--f-display);font-stretch:100%;font-weight:700;font-size:clamp(22px,3vw,28px);line-height:1.15;margin:0 0 6px;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:0 0 4px}
+p{margin:0 0 12px;max-width:66ch}
+.lede{font-size:clamp(18px,2.2vw,21px);color:var(--ink-2);max-width:60ch}
+.lede strong{color:var(--ink);font-weight:600}
+.num{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-size:.92em}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:baseline;transform:translateY(-1px)}
+
+.controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:28px 0 8px;padding:12px 0;border-block:1px solid var(--rule);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+.controls .label{font-family:var(--f-data);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;padding:3px;background:var(--panel);flex-wrap:wrap}
+.seg button{font:600 14px/1 var(--f-body);color:var(--ink-2);background:transparent;border:0;border-radius:6px;padding:8px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.seg button:focus-visible,select:focus-visible,summary:focus-visible,.dot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--ink-2)}
+
+section.fig{margin-top:56px;display:grid;gap:10px}
+.fig .claim{color:var(--ink-2);font-size:16px}
+.chart{position:relative;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 8px 6px;min-width:0}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.src{font-size:13px;color:var(--ink-3)}
+.axis text{font-family:var(--f-data);font-size:11px;fill:var(--ink-3)}
+.axis path,.axis line{stroke:var(--rule)}
+.grid line{stroke:var(--grid)}
+.grid path{display:none}
+.lab{font-family:var(--f-body);font-size:12.5px;fill:var(--ink-2)}
+.lab.strong{fill:var(--ink);font-weight:600}
+.note{font-family:var(--f-data);font-size:11px;fill:var(--ink-3)}
+.zero{stroke:var(--ink-3);stroke-width:1}
+.ref{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:4 4}
+.dot{cursor:pointer}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:13.5px;line-height:1.4;box-shadow:0 6px 24px rgb(0 0 0 / .12);min-width:180px;max-width:240px;z-index:10}
+.tip b{font-family:var(--f-display);font-size:15px}
+.tip .row{display:flex;justify-content:space-between;gap:12px}
+.tip .row span:last-child{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+
+.explore-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+select{font:600 15px var(--f-body);color:var(--ink);background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;max-width:100%}
+.readout{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14.5px;color:var(--ink-2)}
+.readout .num{color:var(--ink)}
+
+.notes{margin-top:64px;padding-top:24px;border-top:2px solid var(--ink);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px}
+.notes p,.notes li{font-size:15px;color:var(--ink-2)}
+.notes ul{padding-left:18px;margin:0}
+.notes li{margin-bottom:8px}
+.notes a{color:var(--accent)}
+details{margin-top:4px}
+summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:15px}
+.tablewrap{overflow-x:auto;margin-top:10px;max-height:460px;overflow-y:auto;border:1px solid var(--rule);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{position:sticky;top:0;background:var(--panel);font-family:var(--f-data);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+td{font-family:var(--f-data);color:var(--ink-2)}
+td:first-child{font-family:var(--f-body);color:var(--ink)}
+@media (max-width:560px){ body{font-size:16px} .wrap{padding-inline:16px;padding-block:28px 48px} .controls{position:static} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Brand shell */
+h1{font-weight:700;letter-spacing:-.035em;font-stretch:100%}
+h2{font-weight:600;letter-spacing:-.02em}
+.subtitle{font-weight:400;letter-spacing:-.01em}
+.eyebrow,.controls .label{font-weight:300}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chart,.seg,.seg button,.tip,select,.tablewrap,.sw{border-radius:0}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Data case study</div>
+  <h1>The Real Movers</h1>
+  <p class="subtitle">Who actually shifted to renewable energy, 2014–2024</p>
+  <p class="lede">In 2024, for the first time, <strong>wind and solar supplied more of the world's energy than hydropower</strong>. Over the decade the world's renewable share rose from <span class="num">9.7%</span> to <span class="num">14.8%</span> of primary energy, and almost all of that came from wind and solar. Hydro's share slipped.</p>
+  <p class="lede">That changes who counts as a leader. Iceland, Norway and Canada top most rankings because of rivers and dams built decades ago. This project separates countries that <strong>already had</strong> renewables from countries that <strong>moved</strong>.</p>
+</header>
+
+<div class="controls" role="group" aria-label="Measure">
+  <span class="label">Measure</span>
+  <div class="seg" id="measureSeg">
+    <button type="button" id="m-energy" data-m="energy" aria-pressed="true">All energy</button>
+    <button type="button" id="m-elec" data-m="elec" aria-pressed="false">Electricity only</button>
+  </div>
+  <div class="legend" aria-label="Sources">
+    <span><i class="sw" style="background:var(--hydro)"></i>Hydro</span>
+    <span><i class="sw" style="background:var(--wind)"></i>Wind</span>
+    <span><i class="sw" style="background:var(--solar)"></i>Solar</span>
+    <span><i class="sw" style="background:var(--other)"></i>Other renewables</span>
+  </div>
+</div>
+<p class="src" id="measureNote"></p>
+
+<section class="fig" id="fig-world">
+  <div class="eyebrow">Figure 1 · World</div>
+  <h2 id="f1title">Wind and solar passed hydropower in 2024</h2>
+  <p class="claim" id="f1claim"></p>
+  <div class="chart" id="c1"></div>
+  <p class="src">Renewable share of the world total, stacked by source. Percent.</p>
+</section>
+
+<section class="fig" id="fig-scatter">
+  <div class="eyebrow">Figure 2 · Countries</div>
+  <h2>Already there, or actually moving?</h2>
+  <p class="claim" id="f2claim">Each dot is a country. Across: its renewable share in 2014. Up: how many percentage points it gained by 2024. Iceland, Norway and Canada barely moved. Sweden and Brazil, also hydro-rich, kept climbing on wind and solar. The largest gains came from countries that started in the middle or near the bottom.</p>
+  <div class="legend" id="driverLegend"></div>
+  <div class="chart" id="c2"></div>
+  <p class="src">Colour shows the source that added the most share. Hover for detail; click a dot to open it in Figure 4.</p>
+</section>
+
+<section class="fig" id="fig-decomp">
+  <div class="eyebrow">Figure 3 · Where the change came from</div>
+  <h2 id="f3title">The biggest gains came from wind and solar</h2>
+  <div class="explore-head">
+    <div class="seg" id="rankSeg">
+      <button type="button" id="r-top" data-r="top" aria-pressed="true">Biggest gains</button>
+      <button type="button" id="r-bottom" data-r="bottom" aria-pressed="false">Smallest gains</button>
+    </div>
+  </div>
+  <p class="claim" id="f3claim"></p>
+  <div class="chart" id="c3"></div>
+  <p class="src">Change in each source's share, 2014 to 2024, in percentage points. Bars left of zero are losses. The dot marks the net change.</p>
+</section>
+
+<section class="fig" id="fig-explore">
+  <div class="eyebrow">Figure 4 · Explorer</div>
+  <h2>One country, source by source</h2>
+  <div class="explore-head">
+    <label for="countrySel" class="label eyebrow">Country</label>
+    <select id="countrySel"></select>
+  </div>
+  <div class="readout" id="readout"></div>
+  <div class="chart" id="c4"></div>
+  <p class="src">Stacked share by source. The dashed line is the world total for comparison.</p>
+  <details>
+    <summary>Show the full table</summary>
+    <div class="tablewrap"><table id="tbl"></table></div>
+  </details>
+</section>
+
+<section class="notes" aria-label="Method and sources">
+  <div>
+    <h3>What changed from the first version</h3>
+    <ul>
+      <li>Leads with change over the decade, not a 10-year average that hides it.</li>
+      <li>Splits growth by source, so old hydropower is not counted as a transition.</li>
+      <li>Shows the world as a reference line instead of 80 unlabelled lines.</li>
+      <li>Uses one country per dot and per row. The old histogram counted country-years and called them countries.</li>
+      <li>States its coverage gaps instead of hiding them in grey map areas.</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Method</h3>
+    <ul>
+      <li><b>All energy</b>: renewables as a share of primary energy, using the substitution method. Wind, solar and hydro are counted as the fossil fuel input they would replace, so they are not undercounted against fuels that lose energy as heat.</li>
+      <li><b>Electricity</b>: renewables as a share of electricity generation. This is the larger number people usually quote.</li>
+      <li>"Other renewables" covers biofuels, bioenergy, geothermal and similar sources.</li>
+      <li>Change is 2024 minus 2014, in percentage points. 2025 electricity data is still incomplete, so it is left out.</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Coverage, plainly</h3>
+    <ul id="coverage"></ul>
+  </div>
+  <div>
+    <h3>Sources</h3>
+    <ul>
+      <li>Primary energy: Energy Institute, <i>Statistical Review of World Energy</i>.</li>
+      <li>Electricity: Ember and Energy Institute.</li>
+      <li>Both compiled by Our World in Data, <a href="https://github.com/owid/energy-data" target="_blank" rel="noopener">owid/energy-data</a> (CC BY 4.0). Downloaded 1 October 2026.</li>
+    </ul>
+  </div>
+</section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const DATA = __DATA__;
+const SRC = [
+  {k:'h', name:'Hydro', v:'--hydro'},
+  {k:'w', name:'Wind', v:'--wind'},
+  {k:'s', name:'Solar', v:'--solar'},
+  {k:'o', name:'Other renewables', v:'--other'}
+];
+const DRIVERS = {h:{name:'Mostly hydro', v:'--hydro'}, w:{name:'Mostly wind', v:'--wind'}, s:{name:'Mostly solar', v:'--solar'}, flat:{name:'Under 1 point, or other sources', v:'--flat'}};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt1 = d3.format('.1f');
+const sign = v => (v>0?'+':v<0?'−':'') + fmt1(Math.abs(v));
+let state = {m:'energy', rank:'top', country:'Vietnam'};
+try{ const s = localStorage.getItem('res-state'); if(s) Object.assign(state, JSON.parse(s)); }catch(e){}
+function save(){ try{ localStorage.setItem('res-state', JSON.stringify(state)); }catch(e){} }
+
+function rows(m){
+  const D = DATA[m];
+  return Object.entries(D).map(([c,v])=>{
+    const i0=v.y.indexOf(2014), i1=v.y.indexOf(2024);
+    const r={country:c, iso:v.iso, af:v.af};
+    SRC.forEach(s=>{ r[s.k+'0']=v[s.k][i0]; r[s.k+'1']=v[s.k][i1]; r['d'+s.k]=v[s.k][i1]-v[s.k][i0]; });
+    r.t0=SRC.reduce((a,s)=>a+r[s.k+'0'],0); r.t1=SRC.reduce((a,s)=>a+r[s.k+'1'],0); r.dt=r.t1-r.t0;
+    const best = ['h','w','s','o'].reduce((a,k)=> r['d'+k]>r['d'+a]?k:a,'h');
+    r.driver = (r.dt<1 || best==='o') ? 'flat' : best;
+    return r;
+  });
+}
+function series(m,c){
+  const v=DATA[m][c];
+  return v.y.map((y,i)=>({year:y,h:v.h[i],w:v.w[i],s:v.s[i],o:v.o[i],t:v.h[i]+v.w[i]+v.s[i]+v.o[i]}));
+}
+function width(el){ return Math.max(300, el.clientWidth-16); }
+
+/* Tooltip */
+function tipFor(container){
+  let t = container.querySelector('.tip');
+  if(!t){ t=document.createElement('div'); t.className='tip'; t.hidden=true; container.appendChild(t); }
+  return {
+    show(html, x, y){ t.innerHTML=html; t.hidden=false;
+      const cw=container.clientWidth, tw=t.offsetWidth, th=t.offsetHeight;
+      let left = x+14; if(left+tw>cw-4) left = x-tw-14; if(left<4) left=4;
+      let top = y-th-10; if(top<4) top=y+14;
+      t.style.left=left+'px'; t.style.top=top+'px'; },
+    hide(){ t.hidden=true; }
+  };
+}
+
+/* Stacked area (Fig 1 and Fig 4) */
+function stackChart(el, data, opts={}){
+  el.querySelectorAll('svg').forEach(n=>n.remove());
+  const W=width(el), H=Math.round(Math.min(420, Math.max(260, W*0.46)));
+  const M={t:16,r:W<520?64:120,b:28,l:40};
+  const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label',opts.label||'Stacked area chart');
+  const x=d3.scaleLinear().domain(d3.extent(data,d=>d.year)).range([M.l,W-M.r]);
+  const ymax=Math.max(d3.max(data,d=>d.t), opts.ref?d3.max(opts.ref,d=>d.t):0);
+  const y=d3.scaleLinear().domain([0, Math.max(5, ymax*1.08)]).nice().range([H-M.b,M.t]);
+  svg.append('g').attr('class','grid').attr('transform',`translate(${M.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W-M.l-M.r)).tickFormat(''));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-M.b})`).call(d3.axisBottom(x).ticks(W<520?4:8).tickFormat(d3.format('d')).tickSizeOuter(0));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${M.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).call(g=>g.select('.domain').remove());
+  const st=d3.stack().keys(SRC.map(s=>s.k))(data);
+  const area=d3.area().x(d=>x(d.data.year)).y0(d=>y(d[0])).y1(d=>y(d[1])).curve(d3.curveMonotoneX);
+  svg.append('g').selectAll('path').data(st).join('path').attr('d',area)
+    .attr('fill',d=>css(SRC.find(s=>s.k===d.key).v)).attr('stroke',css('--panel')).attr('stroke-width',1.5);
+  // direct labels at right edge, collision-adjusted
+  const last=st.map(s=>{const p=s[s.length-1]; return {k:s.key, mid:(p[0]+p[1])/2, val:p[1]-p[0]};});
+  let ys=last.map(l=>({...l, py:y(l.mid)})).sort((a,b)=>b.py-a.py);
+  for(let i=1;i<ys.length;i++){ if(ys[i-1].py-ys[i].py<15) ys[i].py=ys[i-1].py-15; }
+  const gl=svg.append('g');
+  ys.forEach(l=>{ const s=SRC.find(z=>z.k===l.k);
+    gl.append('text').attr('class','lab').attr('x',W-M.r+8).attr('y',l.py+4)
+      .text(W<520? `${fmt1(l.val)}%` : `${s.name.replace(' renewables','')} ${fmt1(l.val)}%`); });
+  if(opts.ref){
+    const line=d3.line().x(d=>x(d.year)).y(d=>y(d.t)).curve(d3.curveMonotoneX);
+    const ref=opts.ref.filter(d=>d.year>=x.domain()[0]);
+    svg.append('path').attr('d',line(ref)).attr('fill','none').attr('stroke',css('--panel')).attr('stroke-width',4.5).attr('opacity',.85);
+    svg.append('path').attr('d',line(ref)).attr('fill','none').attr('stroke',css('--ink')).attr('stroke-width',2).attr('stroke-dasharray','5 4');
+    const lr=ref[ref.length-1];
+    svg.append('text').attr('class','note').attr('x',x(lr.year)-4).attr('y',y(lr.t)-6).attr('text-anchor','end').text(`World ${fmt1(lr.t)}%`);
+  }
+  if(opts.annot) opts.annot(svg,x,y,W,H,M);
+  // hover crosshair
+  const tip=tipFor(el);
+  const cross=svg.append('line').attr('stroke',css('--ink-3')).attr('stroke-width',1).attr('y1',M.t).attr('y2',H-M.b).attr('opacity',0);
+  svg.append('rect').attr('x',M.l).attr('y',M.t).attr('width',W-M.l-M.r).attr('height',H-M.t-M.b).attr('fill','transparent')
+    .on('pointermove',ev=>{
+      const [mx]=d3.pointer(ev); const yr=Math.round(x.invert(mx)); const d=data.find(z=>z.year===yr); if(!d) return;
+      cross.attr('x1',x(yr)).attr('x2',x(yr)).attr('opacity',1);
+      const r=el.getBoundingClientRect(), sv=el.querySelector('svg').getBoundingClientRect(), sc=sv.width/W;
+      let html=`<b>${yr}</b>`+SRC.slice().reverse().map(s=>`<div class="row"><span><i class="sw" style="background:var(${s.v})"></i>${s.name}</span><span>${fmt1(d[s.k])}%</span></div>`).join('')+`<div class="row"><span><b style="font-size:13.5px">Total</b></span><span>${fmt1(d.t)}%</span></div>`;
+      if(opts.ref){ const w=opts.ref.find(z=>z.year===yr); if(w) html+=`<div class="row"><span>World total</span><span>${fmt1(w.t)}%</span></div>`; }
+      tip.show(html, (sv.left-r.left)+x(yr)*sc, (sv.top-r.top)+M.t*sc+40);
+    })
+    .on('pointerleave',()=>{tip.hide(); cross.attr('opacity',0);});
+}
+
+/* Fig 2 scatter */
+function scatter(el, R){
+  el.querySelectorAll('svg').forEach(n=>n.remove());
+  const W=width(el), H=Math.round(Math.min(540, Math.max(320, W*0.58)));
+  const M={t:20,r:20,b:44,l:48};
+  const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label','Scatter of 2014 renewable share against change to 2024');
+  const C=R.filter(r=>r.country!=='World'), world=R.find(r=>r.country==='World');
+  const x=d3.scaleLinear().domain([0, Math.min(100, d3.max(C,d=>d.t0)*1.05)]).nice().range([M.l,W-M.r]);
+  const y=d3.scaleLinear().domain([Math.min(-5,d3.min(C,d=>d.dt)-1), d3.max(C,d=>d.dt)+2]).nice().range([H-M.b,M.t]);
+  svg.append('g').attr('class','grid').attr('transform',`translate(${M.l},0)`).call(d3.axisLeft(y).ticks(6).tickSize(-(W-M.l-M.r)).tickFormat(''));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-M.b})`).call(d3.axisBottom(x).ticks(W<520?5:10).tickFormat(d=>d+'%').tickSizeOuter(0));
+  svg.append('g').attr('class','axis').attr('transform',`translate(${M.l},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(d=>(d>0?'+':'')+d)).call(g=>g.select('.domain').remove());
+  svg.append('text').attr('class','note').attr('x',W-M.r).attr('y',H-8).attr('text-anchor','end').text('Renewable share in 2014 →');
+  svg.append('text').attr('class','note').attr('x',M.l-40).attr('y',M.t-6).text('↑ Change to 2024, points');
+  svg.append('line').attr('class','zero').attr('x1',M.l).attr('x2',W-M.r).attr('y1',y(0)).attr('y2',y(0));
+  svg.append('line').attr('class','ref').attr('x1',M.l).attr('x2',W-M.r).attr('y1',y(world.dt)).attr('y2',y(world.dt));
+  svg.append('text').attr('class','note').attr('x',W-M.r-2).attr('y',y(world.dt)-6).attr('text-anchor','end').text(`World ${sign(world.dt)} pts`);
+  const qx=W-M.r-4, qy=y(0)+18;
+  svg.append('text').attr('class','lab strong').attr('x',qx).attr('y',qy).attr('text-anchor','end').text('Already there');
+  svg.append('text').attr('class','lab').attr('x',qx).attr('y',qy+15).attr('text-anchor','end').text('high share, little change');
+  const tip=tipFor(el);
+  const order=['flat','h','w','s'];
+  const pts=C.slice().sort((a,b)=>order.indexOf(a.driver)-order.indexOf(b.driver));
+  svg.append('g').selectAll('circle').data(pts).join('circle').attr('class','dot')
+    .attr('cx',d=>x(d.t0)).attr('cy',d=>y(d.dt)).attr('r',W<520?4.5:5.5)
+    .attr('fill',d=>css(DRIVERS[d.driver].v)).attr('stroke',css('--panel')).attr('stroke-width',1.5)
+    .attr('tabindex',0).attr('aria-label',d=>`${d.country}: ${fmt1(d.t0)}% in 2014, ${sign(d.dt)} points by 2024`)
+    .on('pointerenter focus',function(ev,d){
+      d3.select(this).attr('r',W<520?6.5:8);
+      const r=el.getBoundingClientRect(), sv=el.querySelector('svg').getBoundingClientRect(), sc=sv.width/W;
+      tip.show(`<b>${d.country}</b><div class="row"><span>2014</span><span>${fmt1(d.t0)}%</span></div><div class="row"><span>2024</span><span>${fmt1(d.t1)}%</span></div><div class="row"><span>Change</span><span>${sign(d.dt)} pts</span></div>`+
+        SRC.map(s=>`<div class="row"><span><i class="sw" style="background:var(${s.v})"></i>${s.name}</span><span>${sign(d['d'+s.k])}</span></div>`).join(''),
+        (sv.left-r.left)+x(d.t0)*sc, (sv.top-r.top)+y(d.dt)*sc);
+    })
+    .on('pointerleave blur',function(){ d3.select(this).attr('r',W<520?4.5:5.5); tip.hide(); })
+    .on('click keydown',(ev,d)=>{ if(ev.type==='keydown' && ev.key!=='Enter') return; state.country=d.country; save(); renderExplorer(); document.getElementById('fig-explore').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); });
+  // selective labels with greedy collision avoidance
+  const want=new Set([...C.slice().sort((a,b)=>b.dt-a.dt).slice(0,W<520?4:7).map(d=>d.country),'Norway','Iceland','Canada','Vietnam','China','United States','India','Brazil']);
+  const boxes=[{x0:qx-150,x1:qx,y0:qy-12,y1:qy+18}]; const g=svg.append('g');
+  C.filter(d=>want.has(d.country)).sort((a,b)=>b.dt-a.dt).forEach(d=>{
+    const name=d.country==='United States'?'US':d.country==='United Kingdom'?'UK':d.country;
+    const w=name.length*6.6+4, cx=x(d.t0), cy=y(d.dt);
+    const cands=[[cx+8,cy+4,'start'],[cx-8,cy+4,'end'],[cx+6,cy-9,'start'],[cx+6,cy+16,'start']];
+    for(const [lx,ly,a] of cands){
+      const x0=a==='start'?lx:lx-w, b={x0,x1:x0+w,y0:ly-11,y1:ly+3};
+      if(b.x0<M.l||b.x1>W-M.r) continue;
+      if(boxes.some(o=>!(b.x1<o.x0||b.x0>o.x1||b.y1<o.y0||b.y0>o.y1))) continue;
+      boxes.push(b); g.append('text').attr('class','lab').attr('x',lx).attr('y',ly).attr('text-anchor',a).text(name); break;
+    }
+  });
+}
+
+/* Fig 3 diverging stacked bars */
+function decomp(el, R){
+  el.querySelectorAll('svg').forEach(n=>n.remove());
+  const C=R.filter(r=>r.country!=='World').sort((a,b)=>b.dt-a.dt);
+  const pick = state.rank==='top' ? C.slice(0,15) : C.slice(-15).reverse();
+  const list=[R.find(r=>r.country==='World'), ...pick];
+  const W=width(el), rowH=26, M={t:8,r:56,b:30,l:W<520?104:140}, H=M.t+M.b+list.length*rowH;
+  const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label','Change in share by source');
+  const segs=list.map(r=>{ let pos=0,neg=0; return SRC.map(s=>{ const v=r['d'+s.k]; let a,b; if(v>=0){a=pos;b=pos+v;pos=b;} else {a=neg+v;b=neg;neg=a;} return {r,s,v,a,b}; }); });
+  const lo=Math.min(-2,d3.min(segs.flat(),d=>d.a)), hi=Math.max(2,d3.max(segs.flat(),d=>d.b));
+  const x=d3.scaleLinear().domain([lo,hi]).nice().range([M.l,W-M.r]);
+  const y=d3.scaleBand().domain(list.map(d=>d.country)).range([M.t,H-M.b]).paddingInner(0.32);
+  svg.append('g').attr('class','grid').attr('transform',`translate(0,${H-M.b})`).call(d3.axisBottom(x).ticks(6).tickSize(-(H-M.t-M.b)).tickFormat(''));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-M.b})`).call(d3.axisBottom(x).ticks(W<520?4:8).tickFormat(d=>(d>0?'+':'')+d).tickSizeOuter(0)).call(g=>g.select('.domain').remove());
+  svg.append('g').selectAll('text').data(list).join('text').attr('class',d=>'lab'+(d.country==='World'?' strong':''))
+    .attr('x',M.l-10).attr('y',d=>y(d.country)+y.bandwidth()/2+4).attr('text-anchor','end')
+    .text(d=>{ const n=d.country==='United States'?'US':d.country==='United Kingdom'?'UK':d.country==='United Arab Emirates'?'UAE':d.country==='Trinidad and Tobago'?'Trinidad & T.':d.country; return n; });
+  const tip=tipFor(el);
+  svg.append('g').selectAll('rect').data(segs.flat().filter(d=>Math.abs(d.v)>0.005)).join('rect')
+    .attr('x',d=>x(d.a)).attr('width',d=>Math.max(0.5,x(d.b)-x(d.a))).attr('y',d=>y(d.r.country)).attr('height',y.bandwidth())
+    .attr('fill',d=>css(d.s.v)).attr('stroke',css('--panel')).attr('stroke-width',1)
+    .on('pointerenter',function(ev,d){ const r=el.getBoundingClientRect(), sv=el.querySelector('svg').getBoundingClientRect(), sc=sv.width/W;
+      tip.show(`<b>${d.r.country}</b><div class="row"><span><i class="sw" style="background:var(${d.s.v})"></i>${d.s.name}</span><span>${sign(d.v)} pts</span></div><div class="row"><span>Net change</span><span>${sign(d.r.dt)} pts</span></div>`, (sv.left-r.left)+x((d.a+d.b)/2)*sc, (sv.top-r.top)+y(d.r.country)*sc); })
+    .on('pointerleave',()=>tip.hide());
+  svg.append('line').attr('class','zero').attr('x1',x(0)).attr('x2',x(0)).attr('y1',M.t).attr('y2',H-M.b);
+  const g=svg.append('g');
+  list.forEach(r=>{ const cy=y(r.country)+y.bandwidth()/2;
+    g.append('circle').attr('cx',x(r.dt)).attr('cy',cy).attr('r',3.5).attr('fill',css('--ink')).attr('stroke',css('--panel')).attr('stroke-width',1.5);
+    const end=Math.max(x(0),...segs[list.indexOf(r)].map(s=>x(s.b)));
+    g.append('text').attr('class','lab'+(r.country==='World'?' strong':'')).attr('x',Math.min(end+6,W-M.r+6)).attr('y',cy+4).text(sign(r.dt)); });
+}
+
+function renderTable(R){
+  const C=R.slice().sort((a,b)=>b.dt-a.dt);
+  const t=document.getElementById('tbl');
+  t.innerHTML='<thead><tr><th>Country</th><th>2014</th><th>2024</th><th>Change</th><th>Hydro</th><th>Wind</th><th>Solar</th><th>Other</th></tr></thead><tbody>'+
+    C.map(r=>`<tr><td>${r.country}</td><td>${fmt1(r.t0)}%</td><td>${fmt1(r.t1)}%</td><td>${sign(r.dt)}</td><td>${sign(r.dh)}</td><td>${sign(r.dw)}</td><td>${sign(r.ds)}</td><td>${sign(r.do)}</td></tr>`).join('')+'</tbody>';
+}
+
+function renderExplorer(){
+  const m=state.m, D=DATA[m];
+  const sel=document.getElementById('countrySel');
+  const names=Object.keys(D).filter(c=>c!=='World').sort();
+  if(!D[state.country]) state.country = D['Vietnam']?'Vietnam':names[0];
+  sel.innerHTML=names.map(c=>`<option value="${c}"${c===state.country?' selected':''}>${c}</option>`).join('');
+  const R=rows(m).find(r=>r.country===state.country);
+  document.getElementById('readout').innerHTML =
+    `<span>2014 <span class="num">${fmt1(R.t0)}%</span> → 2024 <span class="num">${fmt1(R.t1)}%</span> (<span class="num">${sign(R.dt)}</span> pts)</span>`+
+    SRC.map(s=>`<span><i class="sw" style="background:var(${s.v})"></i>${s.name} <span class="num">${sign(R['d'+s.k])}</span></span>`).join('');
+  stackChart(document.getElementById('c4'), series(m,state.country), {ref:series(m,'World'), label:`Renewable share by source, ${state.country}`});
+}
+
+function render(){
+  const m=state.m, R=rows(m), W=R.find(r=>r.country==='World'), meta=DATA.meta;
+  document.querySelectorAll('#measureSeg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.m===m));
+  document.querySelectorAll('#rankSeg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.r===state.rank));
+  const n=R.length-1;
+  document.getElementById('measureNote').textContent = m==='energy'
+    ? `Share of all primary energy: electricity, heating and transport fuels. ${n} countries reported.`
+    : `Share of electricity generation only. ${n} countries generating at least 5 TWh a year. Electricity shares run higher because heating and transport still mostly burn fuel directly.`;
+  const ws=series(m,'World'), w24=ws.find(d=>d.year===2024), w14=ws.find(d=>d.year===2014);
+  document.getElementById('f1claim').innerHTML =
+    `${m==='energy'?'Of all primary energy':'Of all electricity'}, wind and solar together reached <span class="num">${fmt1(w24.w+w24.s)}%</span> in 2024, up from <span class="num">${fmt1(w14.w+w14.s)}%</span> in 2014. Hydro went from <span class="num">${fmt1(w14.h)}%</span> to <span class="num">${fmt1(w24.h)}%</span>. The renewable total rose <span class="num">${sign(W.dt)}</span> points, and wind and solar supplied <span class="num">${fmt1(W.dw+W.ds)}</span> of them.`;
+  stackChart(document.getElementById('c1'), ws, {label:'World renewable share by source', annot:(svg,x,y,Wd,H,M)=>{
+    const yr=2024, px=x(yr);
+    svg.append('line').attr('x1',px).attr('x2',px).attr('y1',y(w24.t)-4).attr('y2',y(w24.t)-26).attr('stroke',css('--ink-2'));
+    svg.append('text').attr('class','note').attr('x',px-4).attr('y',y(w24.t)-30).attr('text-anchor','end').text('2024: wind + solar pass hydro');
+  }});
+  const legend=document.getElementById('driverLegend');
+  legend.innerHTML=['h','w','s','flat'].map(k=>`<span><i class="sw" style="background:var(${DRIVERS[k].v})"></i>${DRIVERS[k].name}</span>`).join('');
+  scatter(document.getElementById('c2'), R);
+  const C=R.filter(r=>r.country!=='World');
+  const top=C.slice().sort((a,b)=>b.dt-a.dt).slice(0,15);
+  const ws15=top.filter(r=>r.dw+r.ds > r.dh+r.do).length;
+  const fell=C.filter(r=>r.dt<0).map(r=>r.country);
+  if(state.rank==='top'){
+    document.getElementById('f3title').textContent='The biggest gains came from wind and solar';
+    document.getElementById('f3claim').textContent=`In ${ws15} of the 15 biggest gainers, wind and solar added more than hydro and other sources combined.`;
+  } else {
+    document.getElementById('f3title').textContent='Where the share stalled or fell';
+    document.getElementById('f3claim').textContent= fell.length
+      ? `${fell.length} ${fell.length===1?'country':'countries'} ended the decade with a lower renewable share: ${fell.slice(0,6).join(', ')}${fell.length>6?' and others':''}. Most of these declines trace to hydro or geothermal losing share, even where solar and wind grew.`
+      : 'No country ended the decade with a lower renewable share.';
+  }
+  decomp(document.getElementById('c3'), R);
+  renderTable(R);
+  renderExplorer();
+  document.getElementById('coverage').innerHTML = m==='energy'
+    ? `<li>The all-energy series covers ${meta.energyCountries} countries. Only ${meta.africaEnergy} are in Africa (Algeria, Egypt, Morocco, South Africa). The rest of the continent is reported only as a regional total, so it cannot appear here.</li><li>Traditional biomass, such as wood and charcoal for cooking, is not counted. It is a large share of energy in many low-income countries.</li><li>Switch to Electricity for wider coverage: ${meta.africaElec} African countries pass the size filter there.</li>`
+    : `<li>The electricity series covers ${meta.elecAll2024} countries in 2024. This view keeps the ${meta.elecCountries} that generate at least 5 TWh a year, because very small systems swing by tens of points when one plant opens.</li><li>${meta.africaElec} of the ${meta.africaElecAll} African countries in the data pass that filter.</li><li>Nuclear is low-carbon but not renewable, so it is excluded. France and Sweden look different on a low-carbon measure.</li>`;
+}
+
+document.getElementById('measureSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; state.m=b.dataset.m; save(); render(); });
+document.getElementById('rankSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; state.rank=b.dataset.r; save(); render(); });
+document.getElementById('countrySel').addEventListener('change',e=>{ state.country=e.target.value; save(); renderExplorer(); });
+let rt; window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(render,150); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+render();
+</script>
+
+<script>
+/* Report page height to a parent page when embedded in an iframe. */
+(function(){ if(window.parent===window) return;
+  /* Embedded on corvstudio.com: match the site's light theme regardless of the visitor's OS setting. */
+  document.documentElement.setAttribute('data-theme','light');
+  let last=0; function send(){ const h=Math.ceil(document.documentElement.scrollHeight); if(h!==last){ last=h; window.parent.postMessage({type:'renewable-energy-shift-height',height:h},'*'); } }
+  new ResizeObserver(send).observe(document.body); window.addEventListener('load',send); send(); })();
+</script>
+</body>
+</html>
