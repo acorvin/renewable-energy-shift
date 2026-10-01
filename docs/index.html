@@ -91,6 +91,9 @@ th{position:sticky;top:0;background:var(--panel);font-family:var(--f-data);font-
 td{font-family:var(--f-data);color:var(--ink-2)}
 td:first-child{font-family:var(--f-body);color:var(--ink)}
 @media (max-width:560px){ body{font-size:16px} .wrap{padding-inline:16px;padding-block:28px 48px} .controls{position:static} }
+/* Embedded in another page: the host page supplies the outer spacing. */
+.is-embedded .wrap{padding-block:8px 16px}
+.is-embedded .controls{position:static}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 /* Brand shell */
@@ -465,6 +468,7 @@ render();
 (function(){ if(window.parent===window) return;
   /* Embedded on corvstudio.com: match the site's light theme regardless of the visitor's OS setting. */
   document.documentElement.setAttribute('data-theme','light');
+  document.documentElement.classList.add('is-embedded');
   let last=0; function send(){ const h=Math.ceil(document.body.getBoundingClientRect().height); if(h!==last){ last=h; window.parent.postMessage({type:'renewable-energy-shift-height',height:h},'*'); } }
   new ResizeObserver(send).observe(document.body); window.addEventListener('load',send); send(); })();
 </script>
