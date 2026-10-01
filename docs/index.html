@@ -465,7 +465,7 @@ render();
 (function(){ if(window.parent===window) return;
   /* Embedded on corvstudio.com: match the site's light theme regardless of the visitor's OS setting. */
   document.documentElement.setAttribute('data-theme','light');
-  let last=0; function send(){ const h=Math.ceil(document.documentElement.scrollHeight); if(h!==last){ last=h; window.parent.postMessage({type:'renewable-energy-shift-height',height:h},'*'); } }
+  let last=0; function send(){ const h=Math.ceil(document.body.getBoundingClientRect().height); if(h!==last){ last=h; window.parent.postMessage({type:'renewable-energy-shift-height',height:h},'*'); } }
   new ResizeObserver(send).observe(document.body); window.addEventListener('load',send); send(); })();
 </script>
 </body>
